@@ -1,6 +1,10 @@
 #define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+#include "renderer/Renderer.h"
+#include "renderer/Shader.h"
+#include "renderer/VertexObject.h"
+#include "renderer/Encoder.h"
 
 #include "iostream"
 #include "fstream"
@@ -10,13 +14,14 @@
 #include "chrono"
 #include "thread"
 
-#include "renderer/Renderer.h"
-#include "renderer/Shader.h"
-#include "renderer/VertexObject.h"
-#include "renderer/Encoder.h"
+#include "osu-parser/osu!parser.h"
 
 int main() 
 {
+
+
+    return -1;
+
     /* GLFW */
     GLFWwindow *window;
     const unsigned int width = 1920, height = 1080;
