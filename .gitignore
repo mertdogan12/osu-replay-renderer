@@ -1,5 +1,7 @@
 # Prerequisites
 *.d
+.ccls-cache
+vgcore.*
 
 # Compiled Object files
 *.slo
@@ -30,3 +32,10 @@
 *.exe
 *.out
 *.app
+
+# Video files
+*.avi
+*.mp4
+
+# Other
+sample_data
