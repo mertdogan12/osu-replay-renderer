@@ -5,6 +5,8 @@
 #include "renderer/Shader.h"
 #include "renderer/VertexObject.h"
 #include "renderer/Encoder.h"
+#include "osu-parser/osu!parser.h"
+#include "imgui/imgui.h"
 
 #include "iostream"
 #include "fstream"
@@ -14,13 +16,11 @@
 #include "chrono"
 #include "thread"
 
-#include "osu-parser/osu!parser.h"
-
 int main() 
 {
     /* Osu replay parser */
-    std::string fileName = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
-    std::ifstream replayFile(fileName, std::ios::binary);
+    std::string filePath = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
+    std::ifstream replayFile(filePath, std::ios::binary);
 
     osuParser::OsrParser p(&replayFile);
     p.Parse();
@@ -74,8 +74,9 @@ int main()
     // renderer::Encoder encoder("out.mp4", width, height);
 
     {
+        int sinceLast = 0;
         int actionCount = 0;
-        osuParser::OsTime time = 0;
+        osuParser::OsTime time = 7500;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -83,17 +84,32 @@ int main()
             /* Clear */
             renderer::Renderer::clear();
 
+            /* Render here */
             osuParser::Action action = p.actions[actionCount];
 
-            if (time >= action.sinceStart)
+            renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords((action.x + sinceLast) * width / 512
+                        , (action.y + sinceLast) * height / 384);
+
+            if (time == action.sinceStart)
             {
-                renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(action.x, action.y);
+                std::cout << time << std::endl;
+
+                sinceLast = p.actions[actionCount + 1].sinceLast;
                 actionCount++;
             }
 
+            // ImGUI
+            int sleep = 0;
+            ImGui::InputInt("Speed", &sleep);
+            ImGui::Text("Time: %d", time),
+            ImGui::Text("sinceStart: %d", action.sinceStart),
+            ImGui::Text("sinceLast: %d", sinceLast),
+
+            sinceLast++;
             time++;
 
-            std::cout << time << " " << action.sinceStart << " " << action.x << " " << action.y << std::endl;
+            // std::cout << time << " " << i << std::endl;
+            // std::cout << time << " " << action.sinceStart << " " << action.x << " " << action.y << std::endl;
 
             /* Parses the map into vertecies and indicies */
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
@@ -118,6 +134,8 @@ int main()
             // encoder.Write(pixels, pixelsSize);
 
             // free(pixels);
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
         }
     }
 
