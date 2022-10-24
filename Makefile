@@ -3,7 +3,7 @@ all: build
 build:
 	@echo "Building"
 	mkdir -p bin
-	clang++ -std=c++17 -g \
+	g++ -g \
 		src/main.cpp vendor/**/*.cpp vendor/lzma/*.c \
 		-Isrc -Ivendor \
 		-lGLEW -lGLU -lglfw3 -ldl -lpthread -lGL -lrenderer \
@@ -12,7 +12,7 @@ build:
 build-log:
 	@echo "Building with loggin (log.txt)"
 	mkdir -p bin
-	clang++ -std=c++17 -g \
+	g++ -g \
 		src/main.cpp vendor/**/*.cpp vendor/lzma/*.c \
 		-Isrc -Ivendor \
 		-lGLEW -lGLU -lglfw3 -ldl -lpthread -lGL -lrenderer \
