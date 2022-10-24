@@ -14,7 +14,7 @@
 #include <string>
 #include <math.h>
 #include "OsTypes.h"
-#include "LzmaLib.h"
+#include "lzma/LzmaLib.h"
 
 #define IsBitSet(variable, bitNumber) bool((variable) & (1 << (bitNumber)))
 

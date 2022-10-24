@@ -195,7 +195,6 @@ WRes CriticalSection_Init(CCriticalSection *p)
 #ifndef __APPLE__
 #ifndef _7ZIP_AFFINITY_DISABLE
 // _GNU_SOURCE can be required for pthread_setaffinity_np() / CPU_ZERO / CPU_SET
-#define _GNU_SOURCE
 #endif
 #endif
 
