@@ -18,9 +18,12 @@
 
 int main() 
 {
+    /* Osu replay parser */
+    std::string fileName = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
+    std::ifstream replayFile(fileName, std::ios::binary);
 
-
-    return -1;
+    osuParser::OsrParser p(&replayFile);
+    p.Parse();
 
     /* GLFW */
     GLFWwindow *window;
@@ -31,8 +34,7 @@ int main()
         return -1;
 
     // Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(width, height, "Renderer", NULL, NULL);
-    if (!window)
+    window = glfwCreateWindow(width, height, "Renderer", NULL, NULL); if (!window)
     {
         glfwTerminate();
         return -1;
@@ -57,17 +59,41 @@ int main()
         return -1;
     }
 
+    /* Textures */
+    enum TexIds
+    {
+        CURSOR = 0x00
+    };
+
+    const std::string skin = "osu-skin";
+    renderer::VertexObject cursor(0, 0, 1, 1, std::string("res/skins/").append(skin).append("/cursor.png"));
+
+    renderer::Renderer::map.insert({TexIds::CURSOR, &cursor});
+
     // Encoder
     // renderer::Encoder encoder("out.mp4", width, height);
 
     {
-        float x = 0.0f, scale = 0.0f;
+        int actionCount = 0;
+        osuParser::OsTime time = 0;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            /* Render here */
+            /* Clear */
             renderer::Renderer::clear();
+
+            osuParser::Action action = p.actions[actionCount];
+
+            if (time >= action.sinceStart)
+            {
+                renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(action.x, action.y);
+                actionCount++;
+            }
+
+            time++;
+
+            std::cout << time << " " << action.sinceStart << " " << action.x << " " << action.y << std::endl;
 
             /* Parses the map into vertecies and indicies */
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
