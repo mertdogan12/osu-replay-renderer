@@ -23,13 +23,20 @@
 #include "math.h"
 
 // Calculates the distance between two points (2d)
-float calcDistance(glm::vec2 p1, glm::vec2 p2)
+float calcDistance(const glm::vec2 &p1, const glm::vec2 &p2)
 {
     return std::sqrt
         (
          std::pow((p2[0] - p1[0]), 2) + 
          std::pow(p2[1] - p1[1], 2)
          );
+}
+
+
+// Calculates the a normalize vector witch points from p1 to p2
+glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
+{
+    return p2 - p1;
 }
 
 int main() 
@@ -101,10 +108,8 @@ int main()
         /* Encoder */
         // renderer::Encoder encoder("out.mp4", width, height);
         
-        // The distance between the current and the next action (point of the cursor)
-        // devided by the time between these actions (ttnBeg).
-        // In other words the speed defines how much the cursor needs to move each repeat.
-        float speed = 0.0f;         
+        // The vector witch gets added to the coord each tick.
+        glm::vec2 speed(0.0f, 0.0f);
 
         // remaining time to the next action, time between the two actions
         int ttn = 0, ttnBeg = 0;
@@ -123,28 +128,27 @@ int main()
             renderer::Renderer::clear();
 
             /* Render here */
-            osuParser::Action action = p.actions[actionCount];
 
-            coords = glm::vec2
-                (
-                    1920 / 512 * action.x,
-                    1080 / 384 * action.y
-                 );
+            coords += speed;
             renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
 
             if (ttn <= 0)
             {
                 actionCount++;
-
+                osuParser::Action action = p.actions[actionCount];
                 osuParser::Action nextAction = p.actions[actionCount + 1];
+
+                coords = glm::vec2
+                    (
+                        1920 / 512 * action.x,
+                        1080 / 384 * action.y
+                     );
 
                 ttn = nextAction.sinceLast;
                 ttnBeg = nextAction.sinceLast;
 
                 // Calculation of the speed
-                speed = calcDistance(glm::vec2(float(action.x), float(action.y)), 
-                        glm::vec2(float(action.x), float(action.y)));
-                speed = std::sqrt(std::pow(speed, 2)) / ttnBeg;
+                speed = calcDirectionVector(coords, glm::vec2(nextAction.x, nextAction.y)) / float(ttnBeg);
             }
             
             ttn--;
@@ -157,8 +161,8 @@ int main()
             ImGui::InputInt("Speed", &sleep);
             ImGui::InputInt("Action", &actionCount);
 
-            ImGui::Text("sineStart: %d", int(action.sinceStart));
-            ImGui::Text("sineLast: %d", int(action.sinceLast));
+            // ImGui::Text("sineStart: %d", int(action.sinceStart));
+            // ImGui::Text("sineLast: %d", int(action.sinceLast));
             ImGui::Text("x: %d", int(coords[0]));
             ImGui::Text("y: %d", int(coords[1]));
 
