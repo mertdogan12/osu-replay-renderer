@@ -16,7 +16,6 @@
 #include "iostream"
 #include "fstream"
 #include "unordered_map"
-#include "cstring"
 #include "string"
 #include "chrono"
 #include "thread"
@@ -63,16 +62,6 @@ int main()
     glfwSwapInterval(1);
 
     {
-        /* ImGUI */
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-        ImGui::StyleColorsDark();
-
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 400");
-
         /* Renderer */
         try 
         {
@@ -83,7 +72,7 @@ int main()
             return -1;
         }
 
-        /* Textures */
+        // Textures
         enum TexIds
         {
             CURSOR = 0x00
@@ -93,21 +82,17 @@ int main()
         renderer::VertexObject cursor(0, 0, 1, 1, std::string("res/skins/").append(skin).append("/cursor.png"));
 
         renderer::Renderer::map.insert({TexIds::CURSOR, &cursor});
-
-        /* Encoder */
-        // renderer::Encoder encoder("out.mp4", width, height);
         
         // The vector witch gets added to the coord each tick.
         glm::vec2 speed(0.0f, 0.0f);
 
         // remaining time to the next action, time between the two actions
-        int ttn = 0, ttnBeg = 0;
+        int ttn = 0;
 
         // x any y coords of the cursor
         glm::vec2 coords(0, 0);
 
-        // For debugging
-        int sleep = 0;
+        // Current count
         int actionCount = 0;
 
         /* Loop until the user closes the window */
@@ -117,7 +102,6 @@ int main()
             renderer::Renderer::clear();
 
             /* Render here */
-
             if (ttn <= 0)
             {
                 actionCount++;
@@ -136,34 +120,16 @@ int main()
                         height / 384 * nextAction.y
                      );
 
-                ttn = nextAction.sinceLast;
-                ttnBeg = nextAction.sinceLast;
+                ttn = nextAction.sinceLast / 16;
 
                 // Calculation of the speed
-                glm::vec2 direction = calcDirectionVector(coords, nextCoords);
-                speed = direction / float(ttnBeg);
+                speed = calcDirectionVector(coords, nextCoords) / float(ttn);
             }
 
             coords += speed;
             renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
             
             ttn--;
-
-            // ImGUI
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            
-            ImGui::InputInt("Sleep", &sleep);
-            ImGui::InputInt("Action", &actionCount);
-
-            // ImGui::Text("Speed: %f, %f", speed[0], speed[1]);
-            // ImGui::Text("sineLast: %d", int(action.sinceLast));
-            ImGui::Text("x: %f", coords[0]);
-            ImGui::Text("y: %f", coords[1]);
-
-            ImGui::InputInt("Time to next:", &ttn);
-            ImGui::InputInt("Time to next (Beg):", &ttnBeg);
 
             // Parses the map into vertecies and indicies
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
@@ -182,23 +148,8 @@ int main()
 
             /* Poll for and process events */
             glfwPollEvents();
-
-            /* Pixels to video */
-            // int pixelsSize = width * height * 3; 
-            // GLbyte *pixels = new GLbyte[pixelsSize];
-            // GLCALL(glReadPixels(0, 0, (float) width, (float) height, GL_RGB, GL_BYTE, pixels));
-
-            // encoder.Write(pixels, pixelsSize);
-
-            // free(pixels);
-            
-            std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
         }
     }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
