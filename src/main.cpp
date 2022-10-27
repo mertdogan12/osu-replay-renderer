@@ -139,8 +139,6 @@ int main()
             renderer::Renderer::parseObjects(vertecies, indicies);
 
             /* Render */
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
 
             /* Swap front and back buffers */
