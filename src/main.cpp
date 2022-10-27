@@ -22,17 +22,6 @@
 #include "thread"
 #include "math.h"
 
-// Calculates the distance between two points (2d)
-float calcDistance(const glm::vec2 &p1, const glm::vec2 &p2)
-{
-    return std::sqrt
-        (
-         std::pow((p2[0] - p1[0]), 2) + 
-         std::pow(p2[1] - p1[1], 2)
-         );
-}
-
-
 // Calculates the a normalize vector witch points from p1 to p2
 glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
 {
@@ -118,7 +107,7 @@ int main()
         glm::vec2 coords(0, 0);
 
         // For debugging
-        int sleep = 150;
+        int sleep = 0;
         int actionCount = 0;
 
         /* Loop until the user closes the window */
@@ -129,9 +118,6 @@ int main()
 
             /* Render here */
 
-            coords += speed;
-            renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
-
             if (ttn <= 0)
             {
                 actionCount++;
@@ -140,16 +126,26 @@ int main()
 
                 coords = glm::vec2
                     (
-                        1920 / 512 * action.x,
-                        1080 / 384 * action.y
+                        width / 512 * action.x,
+                        height / 384 * action.y
+                     );
+
+                glm::vec2 nextCoords = glm::vec2
+                    (
+                        width / 512 * nextAction.x,
+                        height / 384 * nextAction.y
                      );
 
                 ttn = nextAction.sinceLast;
                 ttnBeg = nextAction.sinceLast;
 
                 // Calculation of the speed
-                speed = calcDirectionVector(coords, glm::vec2(nextAction.x, nextAction.y)) / float(ttnBeg);
+                glm::vec2 direction = calcDirectionVector(coords, nextCoords);
+                speed = direction / float(ttnBeg);
             }
+
+            coords += speed;
+            renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
             
             ttn--;
 
@@ -158,13 +154,13 @@ int main()
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
             
-            ImGui::InputInt("Speed", &sleep);
+            ImGui::InputInt("Sleep", &sleep);
             ImGui::InputInt("Action", &actionCount);
 
-            // ImGui::Text("sineStart: %d", int(action.sinceStart));
+            // ImGui::Text("Speed: %f, %f", speed[0], speed[1]);
             // ImGui::Text("sineLast: %d", int(action.sinceLast));
-            ImGui::Text("x: %d", int(coords[0]));
-            ImGui::Text("y: %d", int(coords[1]));
+            ImGui::Text("x: %f", coords[0]);
+            ImGui::Text("y: %f", coords[1]);
 
             ImGui::InputInt("Time to next:", &ttn);
             ImGui::InputInt("Time to next (Beg):", &ttnBeg);
