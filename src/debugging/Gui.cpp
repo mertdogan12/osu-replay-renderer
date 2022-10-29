@@ -1,4 +1,4 @@
-#include "ImGui.hpp"
+#include "Gui.hpp"
 
 #include "GLFW/glfw3.h"
 
@@ -8,7 +8,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 namespace osuRenderer {
-    ImGui::ImGui(GLFWwindow *window)
+    Gui::Gui(GLFWwindow *window)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -20,21 +20,21 @@ namespace osuRenderer {
         ImGui_ImplOpenGL3_Init("#version 400");
     }
 
-    ImGui::~ImGui()
+    Gui::~Gui()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 
-    void ImGui::draw()
+    void Gui::draw()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 
-    void ImGui::createFrame()
+    void Gui::createFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

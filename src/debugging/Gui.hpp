@@ -1,11 +1,13 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
+
 namespace osuRenderer {
-    class ImGui
+    class Gui
     {
     public:
-        ImGui(GLFWwindow *window);
-        ~ImGui();
+        Gui(GLFWwindow *window);
+        ~Gui();
         void draw();
         void createFrame();
     };
