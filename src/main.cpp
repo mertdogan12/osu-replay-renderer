@@ -19,7 +19,6 @@
 #include "iostream"
 #include "fstream"
 #include "unordered_map"
-#include "cstring"
 #include "string"
 #include "chrono"
 #include "thread"
@@ -82,7 +81,7 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-        /* Textures */
+        // Textures
         enum TexIds
         {
             CURSOR = 0x00
@@ -98,9 +97,6 @@ int main(int argc, char* argv[])
 
         if (gui)
             imgui = new osuRenderer::Gui(window);
-
-        /* Encoder */
-        // renderer::Encoder encoder("out.mp4", width, height);
         
         // The vector witch gets added to the coord each tick.
         glm::vec2 speed(0.0f, 0.0f);
@@ -142,15 +138,14 @@ int main(int argc, char* argv[])
                 ttn = nextAction.sinceLast / 16;
 
                 // Calculation of the speed
-                glm::vec2 direction = calcDirectionVector(coords, nextCoords);
-                speed = direction / float(ttn);
+                speed = calcDirectionVector(coords, nextCoords) / float(ttn);
             }
 
             coords += speed;
             renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
             
             ttn--;
-
+            
             // ImGUI
             if (gui)
             {
@@ -163,7 +158,7 @@ int main(int argc, char* argv[])
 
                 ImGui::InputInt("Time to next:", &ttn);
             }
-
+            
             // Parses the map into vertecies and indicies
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
 
@@ -172,6 +167,7 @@ int main(int argc, char* argv[])
             renderer::Renderer::parseObjects(vertecies, indicies);
 
             /* Render */
+
             // ImGui
             if (gui)
                 imgui->draw();
@@ -184,17 +180,8 @@ int main(int argc, char* argv[])
 
             /* Poll for and process events */
             glfwPollEvents();
-
-            /* Pixels to video */
-            // int pixelsSize = width * height * 3; 
-            // GLbyte *pixels = new GLbyte[pixelsSize];
-            // GLCALL(glReadPixels(0, 0, (float) width, (float) height, GL_RGB, GL_BYTE, pixels));
-
-            // encoder.Write(pixels, pixelsSize);
-
-            // free(pixels);
         }
-
+        
         delete imgui;
     }
 
