@@ -20,7 +20,7 @@
 #include "thread"
 #include "math.h"
 
-#include "debugging/ImGui.hpp"
+#include "debugging/Gui.hpp"
 #include "commandline/Parse.hpp"
 
 // Calculates the a normalize vector witch points from p1 to p2
@@ -68,9 +68,9 @@ int main(int argc, char* argv[])
 
     {
         /* ImGUI */
-        osuRenderer::ImGui* imgui;
+        osuRenderer::Gui* imgui;
         if (gui)
-            imgui = new osuRenderer::ImGui(window);
+            imgui = new osuRenderer::Gui(window);
 
         /* Renderer */
         try 
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
                         height / 384 * nextAction.y
                      );
 
-                ttn = nextAction.sinceLast;
+                ttn = nextAction.sinceLast / 16;
 
                 // Calculation of the speed
                 glm::vec2 direction = calcDirectionVector(coords, nextCoords);
