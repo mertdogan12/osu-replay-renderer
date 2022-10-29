@@ -2,16 +2,19 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-#include "renderer/Renderer.h"
-#include "renderer/Shader.h"
-#include "renderer/VertexObject.h"
-#include "renderer/Encoder.h"
-#include "osu-parser/osu!parser.h"
+#include "imgui/imgui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_impl_opengl3.h"
+
+#include "renderer/Renderer.h"
+#include "renderer/Shader.h"
+#include "renderer/VertexObject.h"
+#include "renderer/Encoder.h"
+
+#include "osu-parser/osu!parser.h"
 
 #include "iostream"
 #include "fstream"
@@ -21,14 +24,20 @@
 #include "thread"
 #include "math.h"
 
+#include "debugging/Gui.hpp"
+#include "commandline/Parse.hpp"
+
 // Calculates the a normalize vector witch points from p1 to p2
 glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
 {
     return p2 - p1;
 }
 
-int main() 
+int main(int argc, char* argv[]) 
 {
+    /* Command line options */
+    bool gui = osuRenderer::Parse(argv, argv + argc).cmdOptionExists("--gui");
+
     /* Osu replay parser */
     std::string filePath = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
     std::ifstream replayFile(filePath, std::ios::binary);
@@ -82,6 +91,12 @@ int main()
         renderer::VertexObject cursor(0, 0, 1, 1, std::string("res/skins/").append(skin).append("/cursor.png"));
 
         renderer::Renderer::map.insert({TexIds::CURSOR, &cursor});
+
+        /* ImGUI */
+        osuRenderer::Gui* imgui;
+
+        if (gui)
+            imgui = new osuRenderer::Gui(window);
         
         // The vector witch gets added to the coord each tick.
         glm::vec2 speed(0.0f, 0.0f);
@@ -92,7 +107,7 @@ int main()
         // x any y coords of the cursor
         glm::vec2 coords(0, 0);
 
-        // Current count
+        // Current action
         int actionCount = 0;
 
         /* Loop until the user closes the window */
@@ -130,7 +145,20 @@ int main()
             renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
             
             ttn--;
+            
+            // ImGUI
+            if (gui)
+            {
+                imgui->createFrame();  
+               
+                ImGui::InputInt("Action", &actionCount);
 
+                ImGui::Text("x: %f", coords[0]);
+                ImGui::Text("y: %f", coords[1]);
+
+                ImGui::InputInt("Time to next:", &ttn);
+            }
+            
             // Parses the map into vertecies and indicies
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
 
@@ -139,6 +167,12 @@ int main()
             renderer::Renderer::parseObjects(vertecies, indicies);
 
             /* Render */
+
+            // ImGui
+            if (gui)
+                imgui->draw();
+
+            // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
 
             /* Swap front and back buffers */
@@ -147,9 +181,12 @@ int main()
             /* Poll for and process events */
             glfwPollEvents();
         }
+        
+        delete imgui;
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
     return 0;
 } 
