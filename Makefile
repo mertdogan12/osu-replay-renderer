@@ -4,7 +4,7 @@ build:
 	@echo "Building"
 	mkdir -p bin
 	g++ -g \
-		src/**/*.cpp vendor/**/*.cpp vendor/lzma/*.c \
+		src/main.cpp src/**/*.cpp vendor/**/*.cpp vendor/lzma/*.c \
 		-Isrc -Ivendor \
 		-lGLEW -lGLU -lglfw3 -ldl -lpthread -lGL -lrenderer \
 		-o bin/renderer.out
