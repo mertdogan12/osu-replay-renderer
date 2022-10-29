@@ -4,6 +4,11 @@
 
 #include "imgui/imgui.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 #include "renderer/Renderer.h"
 #include "renderer/Shader.h"
 #include "renderer/VertexObject.h"
@@ -67,11 +72,6 @@ int main(int argc, char* argv[])
     glfwSwapInterval(1);
 
     {
-        /* ImGUI */
-        osuRenderer::Gui* imgui;
-        if (gui)
-            imgui = new osuRenderer::Gui(window);
-
         /* Renderer */
         try 
         {
@@ -92,6 +92,12 @@ int main(int argc, char* argv[])
         renderer::VertexObject cursor(0, 0, 1, 1, std::string("res/skins/").append(skin).append("/cursor.png"));
 
         renderer::Renderer::map.insert({TexIds::CURSOR, &cursor});
+
+        /* ImGUI */
+        osuRenderer::Gui* imgui;
+
+        if (gui)
+            imgui = new osuRenderer::Gui(window);
 
         /* Encoder */
         // renderer::Encoder encoder("out.mp4", width, height);
