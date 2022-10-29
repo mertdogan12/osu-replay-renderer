@@ -21,6 +21,7 @@
 #include "math.h"
 
 #include "debugging/ImGui.hpp"
+#include "commandline/Parse.hpp"
 
 // Calculates the a normalize vector witch points from p1 to p2
 glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
@@ -28,8 +29,11 @@ glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
     return p2 - p1;
 }
 
-int main() 
+int main(int argc, char* argv[]) 
 {
+    /* Command line options */
+    bool gui = osuRenderer::Parse(argv, argv + argc).cmdOptionExists("--gui");
+
     /* Osu replay parser */
     std::string filePath = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
     std::ifstream replayFile(filePath, std::ios::binary);
@@ -64,7 +68,9 @@ int main()
 
     {
         /* ImGUI */
-        osuRenderer::ImGui imgui(window);
+        osuRenderer::ImGui* imgui;
+        if (gui)
+            imgui = new osuRenderer::ImGui(window);
 
         /* Renderer */
         try 
@@ -140,14 +146,17 @@ int main()
             ttn--;
 
             // ImGUI
-            imgui.createFrame();  
-           
-            ImGui::InputInt("Action", &actionCount);
+            if (gui)
+            {
+                imgui->createFrame();  
+               
+                ImGui::InputInt("Action", &actionCount);
 
-            ImGui::Text("x: %f", coords[0]);
-            ImGui::Text("y: %f", coords[1]);
+                ImGui::Text("x: %f", coords[0]);
+                ImGui::Text("y: %f", coords[1]);
 
-            ImGui::InputInt("Time to next:", &ttn);
+                ImGui::InputInt("Time to next:", &ttn);
+            }
 
             // Parses the map into vertecies and indicies
             renderer::SizeStruct sizes = renderer::Renderer::calcCount();
@@ -158,7 +167,8 @@ int main()
 
             /* Render */
             // ImGui
-            imgui.draw();
+            if (gui)
+                imgui->draw();
 
             // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
@@ -178,6 +188,8 @@ int main()
 
             // free(pixels);
         }
+
+        delete imgui;
     }
 
     glfwDestroyWindow(window);
