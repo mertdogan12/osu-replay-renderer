@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 
     {
         /* Renderer */
+        // Init
         try 
         {
             renderer::Init();
@@ -183,7 +184,7 @@ int main(int argc, char* argv[])
             // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
 
-            /* Rendered to Video file */
+            /* Writes pixel data to .raw */
             int pixelsSize = width * height * 3; 
             GLbyte *pixels = new GLbyte[pixelsSize];
             GLCALL(glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels));
