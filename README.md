@@ -1,5 +1,5 @@
 # osu-replay-renderer
-Osu replay renderer in c++
+Osu replay renderer in c++ (not working - still in development)
 
 ## Build
 ```bash
@@ -11,6 +11,3 @@ bin/renderer.out
 # run with imgui
 bin/renderer.out --gui
 ```
-
-## Example
-![example.mp4](examples/example.mp4)
