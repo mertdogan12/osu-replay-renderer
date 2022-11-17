@@ -35,11 +35,15 @@ glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
 
 int main(int argc, char* argv[]) 
 {
+    /* Video outpur file */
+    std::ofstream rawVideo;  
+    rawVideo.open("out.raw", std::ios::binary | std::ios::out);
+
     /* Command line options */
     bool gui = osuRenderer::Parse(argv, argv + argc).cmdOptionExists("--gui");
 
     /* Osu replay parser */
-    std::string filePath = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
+    std::string filePath = "res/replays/Mert - WALKURE - Ikenai Borderline (Speed Up Ver.) [AR 10] (2022-11-04) Osu.osr";
     std::ifstream replayFile(filePath, std::ios::binary);
 
     osuParser::OsrParser p(&replayFile);
@@ -72,6 +76,7 @@ int main(int argc, char* argv[])
 
     {
         /* Renderer */
+        // Init
         try 
         {
             renderer::Init();
@@ -97,6 +102,9 @@ int main(int argc, char* argv[])
 
         if (gui)
             imgui = new osuRenderer::Gui(window);
+
+        // Framerate
+        const int FPS = 60;
         
         // The vector witch gets added to the coord each tick.
         glm::vec2 speed(0.0f, 0.0f);
@@ -110,13 +118,12 @@ int main(int argc, char* argv[])
         // Current action
         int actionCount = 0;
 
+        // When to draw
+        const float draw = 1000.0f / FPS;
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            /* Clear */
-            renderer::Renderer::clear();
-
-            /* Render here */
             if (ttn <= 0)
             {
                 actionCount++;
@@ -135,7 +142,7 @@ int main(int argc, char* argv[])
                         height / 384 * nextAction.y
                      );
 
-                ttn = nextAction.sinceLast / 16;
+                ttn = nextAction.sinceLast;
 
                 // Calculation of the speed
                 speed = calcDirectionVector(coords, nextCoords) / float(ttn);
@@ -144,8 +151,8 @@ int main(int argc, char* argv[])
             coords += speed;
             renderer::Renderer::map[TexIds::CURSOR]->ChangeCoords(coords[0], coords[1]);
             
-            ttn--;
-            
+            ttn -= draw;
+
             // ImGUI
             if (gui)
             {
@@ -166,7 +173,9 @@ int main(int argc, char* argv[])
             unsigned int indicies[sizes.Indices];
             renderer::Renderer::parseObjects(vertecies, indicies);
 
-            /* Render */
+            /* Render here */
+            // Clear
+            renderer::Renderer::clear();
 
             // ImGui
             if (gui)
@@ -174,6 +183,13 @@ int main(int argc, char* argv[])
 
             // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
+
+            /* Writes pixel data to .raw */
+            int pixelsSize = width * height * 3; 
+            GLbyte *pixels = new GLbyte[pixelsSize];
+            GLCALL(glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels));
+
+            rawVideo.write((char*) pixels, pixelsSize);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
