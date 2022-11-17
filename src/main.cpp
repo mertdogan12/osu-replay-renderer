@@ -35,11 +35,15 @@ glm::vec2 calcDirectionVector(const glm::vec2 &p1, const glm::vec2 &p2)
 
 int main(int argc, char* argv[]) 
 {
+    /* Video outpur file */
+    std::ofstream rawVideo;  
+    rawVideo.open("out.raw", std::ios::binary | std::ios::out);
+
     /* Command line options */
     bool gui = osuRenderer::Parse(argv, argv + argc).cmdOptionExists("--gui");
 
     /* Osu replay parser */
-    std::string filePath = "res/replays/Mert Dogan - Blue Stahli - Shotgun Senorita (Zardonic Remix) [Insane] (2021-11-11) Osu-1.osr";
+    std::string filePath = "res/replays/Mert - WALKURE - Ikenai Borderline (Speed Up Ver.) [AR 10] (2022-11-04) Osu.osr";
     std::ifstream replayFile(filePath, std::ios::binary);
 
     osuParser::OsrParser p(&replayFile);
@@ -174,6 +178,8 @@ int main(int argc, char* argv[])
 
             // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
+
+            rawVideo.write((char*) pixels, pixelsSize);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
