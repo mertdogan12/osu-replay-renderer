@@ -42,3 +42,6 @@ vgcore.*
 sample_data
 log.txt
 imgui.ini
+
+# Expetions
+!examples/*
