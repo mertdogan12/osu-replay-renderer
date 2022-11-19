@@ -72,8 +72,6 @@ int main(int argc, char* argv[])
     // Make the window's context current
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(1);
-
     {
         /* Renderer */
         // Init
@@ -121,11 +119,17 @@ int main(int argc, char* argv[])
         // When to draw
         const float draw = 1000.0f / FPS;
 
+        int draws = 0;
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             if (ttn <= 0)
             {
+                if (actionCount > p.actions.size() + 1)
+                    break;
+
                 actionCount++;
                 osuParser::Action action = p.actions[actionCount];
                 osuParser::Action nextAction = p.actions[actionCount + 1];
@@ -183,6 +187,7 @@ int main(int argc, char* argv[])
 
             // Draw
             renderer::Draw(1920.0f, 1080.0f, sizes, vertecies, indicies);
+            draws++;
 
             /* Writes pixel data to .raw */
             int pixelsSize = width * height * 3; 
@@ -191,12 +196,19 @@ int main(int argc, char* argv[])
 
             rawVideo.write((char*) pixels, pixelsSize);
 
+            free(pixels);
+
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
 
             /* Poll for and process events */
             glfwPollEvents();
         }
+
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+        std::cout << "Frames: " << draws << std::endl;
+        std::cout << "Time: " << std::chrono::duration_cast<std::chrono::seconds> (end - begin).count() << "[s]" << std::endl;
         
         delete imgui;
     }
